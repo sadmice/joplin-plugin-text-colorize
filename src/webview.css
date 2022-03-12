@@ -1,0 +1,46 @@
+.container {
+	color: var(--joplin-color);
+}
+
+.color-picker {
+	display: flex;
+	width: 200px;
+	margin-bottom: 15px;
+}
+
+.color-input {
+	border: none;
+	outline: none;
+	background-color: var(--joplin-odd-background-color);
+	color: var(--joplin-color);
+	font-size: 15px;
+	height: 30px;
+	width: 161px;
+	border-radius: 3px;
+}
+
+.color-preview {
+	height: 30px;
+	width: 30px;
+	background: #fff;
+	border-radius: 3px;
+	margin-left: 5px;
+}
+
+.saved-colors {
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: 5px;
+}
+
+.saved-color:hover {
+	cursor: pointer;
+}
+
+.saved-color {
+	height: 15px;
+	width: 15px;
+	border-radius: 3px;
+	margin-right: 3px;
+	margin-bottom: 3px;
+}

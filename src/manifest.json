@@ -1,0 +1,12 @@
+{
+	"manifest_version": 1,
+	"id": "sadmice.TextColorize",
+	"app_min_version": "2.7",
+	"version": "1.0.0",
+	"name": "Text Colorize",
+	"description": "Easily apply color to text.",
+	"author": "Sadmice",
+	"homepage_url": "https://github.com/sadmice/Joplin-Plugin-Text-Colorize",
+	"repository_url": "https://github.com/sadmice/Joplin-Plugin-Text-Colorize",
+	"keywords": ["text", "color", "joplin", "plugin"]
+}

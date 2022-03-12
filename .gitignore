@@ -1,0 +1,4 @@
+dist/
+node_modules/
+publish/
+GENERATOR_DOC.md
