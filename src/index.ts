@@ -4,14 +4,14 @@ import { SettingItemType } from "api/types";
 joplin.plugins.register({
 	onStart: async function () {
 		const dialogs = joplin.views.dialogs;
-		const dialog = await dialogs.create("tc_dialog");
+		const dialog = await dialogs.create("text-colorize-dialog");
 
 		await dialogs.addScript(dialog, "./webview.js");
 		await dialogs.addScript(dialog, "./webview.css");
 
 		await dialogs.setButtons(dialog, [
 			{
-				id: "apply",
+				id: "ok",
 				title: "Apply",
 			},
 			{
@@ -53,6 +53,7 @@ joplin.plugins.register({
 
 		await joplin.commands.register({
 			name: "colorPick",
+			label: "Text Colorize",
 			execute: async () => {
 				let selectedText = (await joplin.commands.execute(
 					"selectedText"
@@ -68,13 +69,14 @@ joplin.plugins.register({
 					"saved"
 				)) as string;
 
-				let savedColorHTML = 'Saved colors: <div class="saved-colors">';
+				let savedColorsHTML =
+					'Saved colors: <div class="saved-colors">';
 				savedColors.split(";").forEach((color) => {
 					color = color.trim();
 
-					savedColorHTML += `<div value="${color}" class="saved-color" style="background-color: ${color}"></div>`;
+					savedColorsHTML += `<div value="${color}" class="saved-color" style="background-color: ${color}"></div>`;
 				});
-				savedColorHTML += "</div>";
+				savedColorsHTML += "</div>";
 
 				await dialogs.setHtml(
 					dialog,
@@ -84,7 +86,7 @@ joplin.plugins.register({
 							<input placeholder="#ffffff" class="color-input" name="color_input">
 							<div class="color-preview"></div>
 						</form>
-						${savedColorHTML}
+						${savedColorsHTML}
 					</div>`
 				);
 
@@ -98,7 +100,7 @@ joplin.plugins.register({
 							? colorValue
 							: `${savedColors};${colorValue}`
 					);
-				} else if (res.id === "apply") {
+				} else if (res.id === "ok") {
 					await joplin.commands.execute(
 						"replaceSelection",
 						`<span style="color: ${colorValue}">${selectedText}</span>`
@@ -109,15 +111,11 @@ joplin.plugins.register({
 
 		const shortcut = (await joplin.settings.value("shortcut")) as string;
 
-		await joplin.views.menus.create(
-			"colorPickerDialog",
-			"colorPickerDialog",
-			[
-				{
-					commandName: "colorPick",
-					accelerator: shortcut,
-				},
-			]
-		);
+		await joplin.views.menus.create("text-colorize", "Text Colorize", [
+			{
+				commandName: "colorPick",
+				accelerator: shortcut,
+			},
+		]);
 	},
 });
