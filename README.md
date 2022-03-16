@@ -2,7 +2,7 @@
 
 Easily apply color to text.
 
-![image](https://user-images.githubusercontent.com/23323305/158031781-569d9383-ac7e-4a19-a48b-92109756c531.png)
+![image](https://user-images.githubusercontent.com/23323305/158491432-60dd7097-19b7-4f19-93c2-f35734756eab.png)
 
 ## Installation
 
@@ -28,5 +28,5 @@ Easily apply color to text.
 
 1. Select the text you want to color
 2. Use the shortcut `Ctrl + Shift + C` (can be changed in the plugin settings)
-3. Choose a color (color can be set by [all methods supported by CSS](https://www.w3schools.com/cssref/css_colors_legal.asp))
+3. Choose a color
 4. Click `Apply`

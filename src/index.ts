@@ -69,29 +69,13 @@ joplin.plugins.register({
 					"saved"
 				)) as string;
 
-				let savedColorsHTML =
-					'Saved colors: <div class="saved-colors">';
-				savedColors.split(";").forEach((color) => {
-					color = color.trim();
-
-					savedColorsHTML += `<div value="${color}" class="saved-color" style="background-color: ${color}"></div>`;
-				});
-				savedColorsHTML += "</div>";
-
 				await dialogs.setHtml(
 					dialog,
-					`<div class="container"> 
-						<h2>Text Colorize</h2> 
-						<form class="color-picker" name="color_picker">
-							<input placeholder="#ffffff" class="color-input" name="color_input">
-							<div class="color-preview"></div>
-						</form>
-						${savedColorsHTML}
-					</div>`
+					generateHtml(savedColors.split(";"))
 				);
 
 				const res = await dialogs.open(dialog);
-				const colorValue = res.formData.color_picker.color_input;
+				const colorValue = res.formData.color_picker.hex_input;
 
 				if (res.id === "save") {
 					await joplin.settings.setValue(
@@ -119,3 +103,38 @@ joplin.plugins.register({
 		]);
 	},
 });
+
+function generateHtml(savedColors) {
+	let savedColorsHTML = 'Saved colors <div class="saved-colors">';
+	savedColors.forEach((color) => {
+		color = color.trim();
+
+		savedColorsHTML += `<div value="${color}" class="saved-color" style="background-color: ${color}"></div>`;
+	});
+	savedColorsHTML += "</div>";
+
+	return `<div class="container"> 
+		<h2>Text Colorize</h2> 
+		<form class="color-picker" name="color_picker">
+			<div class="rgb-input">
+				<div>
+					<input type="range" min="0" max="255" value="127" id="r-range">
+					<input type="text" min="0" max="255" value="127" id="r-input">
+				</div>
+				<div>
+					<input type="range" min="0" max="255" value="127" id="g-range">
+					<input type="text" min="0" max="255" value="127" id="g-input">
+				</div>
+				<div>
+					<input type="range" min="0" max="255" value="127" id="b-range">
+					<input type="text" min="0" max="255" value="127" id="b-input">
+				</div>
+			</div>
+			<div class="preview-container">
+				<div class="color-preview"></div>
+				<input value="#7F7F7F" id="hex-input" name="hex_input">
+			</div>
+		</form>
+		${savedColorsHTML}
+	</div>`;
+}
