@@ -2,7 +2,7 @@
 
 Easily apply color to text.
 
-![image](https://user-images.githubusercontent.com/23323305/158491432-60dd7097-19b7-4f19-93c2-f35734756eab.png)
+![image](https://user-images.githubusercontent.com/23323305/163685620-a73ca36a-224e-4ba8-bf7c-93a72b17d37d.png)
 
 ## Installation
 
@@ -29,4 +29,4 @@ Easily apply color to text.
 1. Select the text you want to color
 2. Use the shortcut `Ctrl + Shift + C` (can be changed in the plugin settings)
 3. Choose a color
-4. Click `Apply`
+4. Click `Apply` (foreground) or `Apply as BG` (background)

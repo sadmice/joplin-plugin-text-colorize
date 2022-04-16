@@ -15,12 +15,12 @@ joplin.plugins.register({
 				title: "Apply",
 			},
 			{
-				id: "save",
-				title: "Save color",
+				id: "apply-bg",
+				title: "Apply as BG",
 			},
 			{
 				id: "cancel",
-				title: "Cancel",
+				title: "Close",
 			},
 		]);
 
@@ -76,18 +76,41 @@ joplin.plugins.register({
 
 				const res = await dialogs.open(dialog);
 				const colorValue = res.formData.color_picker.hex_input;
+				const savedColorsChanges = JSON.parse(
+					res.formData.color_picker.saved_colors_changes
+				);
 
-				if (res.id === "save") {
-					await joplin.settings.setValue(
-						"saved",
-						savedColors === ""
-							? colorValue
-							: `${savedColors};${colorValue}`
-					);
-				} else if (res.id === "ok") {
+				let updatedSavedColors = savedColors.split(";");
+
+				if (savedColorsChanges.add) {
+					savedColorsChanges.add.forEach((color) => {
+						updatedSavedColors.push(color);
+					});
+				}
+
+				if (savedColorsChanges.remove) {
+					savedColorsChanges.remove.forEach((color) => {
+						updatedSavedColors.splice(
+							updatedSavedColors.indexOf(color),
+							1
+						);
+					});
+				}
+
+				await joplin.settings.setValue(
+					"saved",
+					updatedSavedColors.join(";")
+				);
+
+				if (res.id === "ok") {
 					await joplin.commands.execute(
 						"replaceSelection",
 						`<span style="color: ${colorValue}">${selectedText}</span>`
+					);
+				} else if (res.id === "apply-bg") {
+					await joplin.commands.execute(
+						"replaceSelection",
+						`<span style="background-color: ${colorValue}">${selectedText}</span>`
 					);
 				}
 			},
@@ -109,7 +132,7 @@ function generateHtml(savedColors) {
 	savedColors.forEach((color) => {
 		color = color.trim();
 
-		savedColorsHTML += `<div value="${color}" class="saved-color" style="background-color: ${color}"></div>`;
+		savedColorsHTML += `<button value="${color}" class="saved-color" style="background-color: ${color}"></button>`;
 	});
 	savedColorsHTML += "</div>";
 
@@ -133,8 +156,11 @@ function generateHtml(savedColors) {
 			<div class="preview-container">
 				<div class="color-preview"></div>
 				<input value="#7F7F7F" id="hex-input" name="hex_input">
+				<button class="save-color">Save this color</button>
 			</div>
+			<input class="saved-colors-changes" name="saved_colors_changes" value="{}">
 		</form>
 		${savedColorsHTML}
+		<div class="remove-colors-text">Right click a color to remove it.</div>
 	</div>`;
 }

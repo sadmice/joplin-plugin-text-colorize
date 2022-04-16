@@ -1,12 +1,15 @@
 const colorPreview = document.querySelector(".color-preview");
 const hexInput = document.querySelector("#hex-input");
-const savedColors = document.querySelector(".saved-colors");
+const savedColorsContainer = document.querySelector(".saved-colors");
+const savedColors = document.querySelectorAll(".saved-color");
 const redRange = document.querySelector("#r-range");
 const greenRange = document.querySelector("#g-range");
 const blueRange = document.querySelector("#b-range");
 const redInput = document.querySelector("#r-input");
 const greenInput = document.querySelector("#g-input");
 const blueInput = document.querySelector("#b-input");
+const savedColorsChangesInput = document.querySelector(".saved-colors-changes");
+const saveColor = document.querySelector(".save-color");
 
 let hex = {
 	red: "7f",
@@ -14,14 +17,9 @@ let hex = {
 	blue: "7f",
 };
 
+let savedColorsChanges = { add: [], remove: [] };
+
 hexInput.addEventListener("keyup", handleHexInput);
-
-savedColors.addEventListener("click", (e) => {
-	hexInput.value = e.target.getAttribute("value");
-
-	handleHexInput();
-	updatePreview();
-});
 
 redRange.addEventListener("input", (e) => handleRange(e.target));
 greenRange.addEventListener("input", (e) => handleRange(e.target));
@@ -30,6 +28,13 @@ blueRange.addEventListener("input", (e) => handleRange(e.target));
 redInput.addEventListener("keyup", handleRgbInput);
 greenInput.addEventListener("keyup", handleRgbInput);
 blueInput.addEventListener("keyup", handleRgbInput);
+
+saveColor.addEventListener("click", saveNewColor);
+
+savedColors.forEach((el) => {
+	el.addEventListener("click", applySavedColor);
+	el.addEventListener("contextmenu", removeSavedColor);
+});
 
 function updatePreview() {
 	colorPreview.style.background = hexInput.value;
@@ -130,6 +135,42 @@ function handleHexInput() {
 		blueRange.value = parseInt(value[5] + value[6], 16);
 		handleRange(blueRange);
 	}
+}
+
+function applySavedColor(e) {
+	e.preventDefault();
+
+	hexInput.value = e.target.getAttribute("value");
+
+	handleHexInput();
+	updatePreview();
+}
+
+function removeSavedColor(e) {
+	e.preventDefault();
+
+	savedColorsChanges.remove.push(e.target.getAttribute("value"));
+
+	savedColorsChangesInput.value = JSON.stringify(savedColorsChanges);
+
+	e.target.remove();
+}
+
+function saveNewColor(e) {
+	e.preventDefault();
+
+	savedColorsChanges.add.push(hexInput.value);
+
+	savedColorsChangesInput.value = JSON.stringify(savedColorsChanges);
+
+	const node = document.createElement("button");
+	node.classList.add("saved-color");
+	node.value = hexInput.value;
+	node.style.backgroundColor = hexInput.value;
+	node.addEventListener("click", applySavedColor);
+	node.addEventListener("contextmenu", removeSavedColor);
+
+	savedColorsContainer.appendChild(node);
 }
 
 handleRange(redRange);
