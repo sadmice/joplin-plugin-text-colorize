@@ -1,3 +1,4 @@
+
 import joplin from "api";
 import { SettingItemType } from "api/types";
 
@@ -40,24 +41,14 @@ joplin.plugins.register({
 					"Saved colors for quick access. Use a semicolon (;) as a separator.",
 			},
 
-			extShortcut: {
+			shortcut: {
 				value: "Ctrl+Shift+C",
 				type: SettingItemType.String,
 				section: "settings.textColorize",
 				public: true,
-				label: "Extension shortcut",
+				label: "Shortcut",
 				description:
 					'Shortcut for the Text Colorize menu, use "+" to combine the keys. You need to restart Joplin to apply the new shortcut.',
-			},
-
-			rcShortcut: {
-				value: "Ctrl+Shift+R",
-				type: SettingItemType.String,
-				section: "settings.textColorize",
-				public: true,
-				label: "Restore color shortcut",
-				description:
-					'Shortcut to restore the original color of the selected text, use "+" to combine the keys. You need to restart Joplin to apply the new shortcut.',
 			},
 		});
 
@@ -65,7 +56,15 @@ joplin.plugins.register({
 			name: "colorPick",
 			label: "Text Colorize",
 			execute: async () => {
-				const selectedText = await getSelectedText();
+				let selectedText = (await joplin.commands.execute(
+					"selectedText"
+				)) as string;
+
+				const newlines = /\n/.test(selectedText);
+
+				if (newlines) {
+					selectedText = `\n\n${selectedText}\n\n`;
+				}
 
 				const savedColors = (await joplin.settings.value(
 					"saved"
@@ -118,40 +117,12 @@ joplin.plugins.register({
 			},
 		});
 
-		await joplin.commands.register({
-			name: "restoreColor",
-			label: "Restore Color",
-			execute: async () => {
-				const selectedText = await getSelectedText();
-				let textBetweenTags = selectedText.match(
-					/<span style="color: (.*)">(.*)<\/span>/
-				);
-
-				if (textBetweenTags) {
-					await joplin.commands.execute(
-						"replaceSelection",
-						`${textBetweenTags[2]}`
-					);
-				}
-			},
-		});
-
-		const extShortcut = (await joplin.settings.value(
-			"extShortcut"
-		)) as string;
-		const rcShortcut = (await joplin.settings.value(
-			"rcShortcut"
-		)) as string;
+		const shortcut = (await joplin.settings.value("shortcut")) as string;
 
 		await joplin.views.menus.create("text-colorize", "Text Colorize", [
 			{
 				commandName: "colorPick",
-				accelerator: extShortcut,
-			},
-
-			{
-				commandName: "restoreColor",
-				accelerator: rcShortcut,
+				accelerator: shortcut,
 			},
 		]);
 	},
@@ -193,18 +164,4 @@ function generateHtml(savedColors) {
 		${savedColorsHTML}
 		<div class="remove-colors-text">Right click a color to remove it.</div>
 	</div>`;
-}
-
-async function getSelectedText() {
-	let selectedText = (await joplin.commands.execute(
-		"selectedText"
-	)) as string;
-
-	const newlines = /\n/.test(selectedText);
-
-	if (newlines) {
-		selectedText = `\n\n${selectedText}\n\n`;
-	}
-
-	return selectedText;
 }
