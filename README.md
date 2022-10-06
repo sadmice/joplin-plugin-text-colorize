@@ -1,6 +1,9 @@
 # Joplin Plugin - Text Colorize
-
 Easily apply color to text.
+
+‼️ Q: **Why doesn't my text save its color?**
+
+‼️ A: **You're probably using the Rich Text Editor and this is a limitation of it. Markdown format and HTML formatting cannot be converted from Rich Text to Markdown. Consider using the Markdown Editor.** (More about the limitations of Rich Text [here](https://joplinapp.org/rich_text_editor/))
 
 ![image](https://user-images.githubusercontent.com/23323305/163685620-a73ca36a-224e-4ba8-bf7c-93a72b17d37d.png)
 
