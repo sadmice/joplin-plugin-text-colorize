@@ -34,4 +34,4 @@ Easily apply color to text.
 3. Choose a color
 4. Click `Apply` (foreground) or `Apply as BG` (background)
 
-To restore the original color of the text, select the needed text (including `span` tags) and press `Ctrl+Shift+R` (can be changed in the plugin settings). *This does not work recursively.*
+To restore the original color of the text, select the needed text (including `span` tags) and press `Ctrl+Shift+R` (can be changed in the plugin settings). 
