@@ -50,22 +50,25 @@ joplin.plugins.register({
 					'Shortcut for the Text Colorize menu, use "+" to combine the keys. You need to restart Joplin to apply the new shortcut.',
 			},
 
-			rcShortcut: {
+			rtShortcut: {
 				value: "Ctrl+Shift+R",
 				type: SettingItemType.String,
 				section: "settings.textColorize",
 				public: true,
-				label: "Restore color shortcut",
+				label: "Restore text shortcut",
 				description:
 					'Shortcut to restore the original color of the selected text, use "+" to combine the keys. You need to restart Joplin to apply the new shortcut.',
 			},
 		});
 
 		await joplin.commands.register({
-			name: "colorPick",
+			name: "colorize",
 			label: "Text Colorize",
 			execute: async () => {
-				const selectedText = await getSelectedText();
+				const selections = await joplin.commands.execute(
+					"editor.execCommand",
+					{ name: "getSelections", args: [] }
+				);
 
 				const savedColors = (await joplin.settings.value(
 					"saved"
@@ -77,81 +80,70 @@ joplin.plugins.register({
 				);
 
 				const res = await dialogs.open(dialog);
-				const colorValue = res.formData.color_picker.hex_input;
+				const color = res.formData.color_picker.hex_input;
 				const savedColorsChanges = JSON.parse(
 					res.formData.color_picker.saved_colors_changes
 				);
 
-				let updatedSavedColors = savedColors.split(";");
-
-				if (savedColorsChanges.add) {
-					savedColorsChanges.add.forEach((color) => {
-						updatedSavedColors.push(color);
-					});
+				if (savedColorsChanges.add || savedColorsChanges.remove) {
+					updateSavedColors(savedColors, savedColorsChanges);
 				}
-
-				if (savedColorsChanges.remove) {
-					savedColorsChanges.remove.forEach((color) => {
-						updatedSavedColors.splice(
-							updatedSavedColors.indexOf(color),
-							1
-						);
-					});
-				}
-
-				await joplin.settings.setValue(
-					"saved",
-					updatedSavedColors.join(";")
-				);
 
 				if (res.id === "ok") {
-					await joplin.commands.execute(
-						"replaceSelection",
-						`<span style="color: ${colorValue}">${selectedText}</span>`
-					);
+					colorize(selections, color, "color");
 				} else if (res.id === "apply-bg") {
-					await joplin.commands.execute(
-						"replaceSelection",
-						`<span style="background-color: ${colorValue}">${selectedText}</span>`
-					);
+					colorize(selections, color, "background-color");
 				}
 			},
 		});
 
 		await joplin.commands.register({
-			name: "restoreColor",
-			label: "Restore Color",
+			name: "restoreText",
+			label: "Restore Text",
 			execute: async () => {
-				const selectedText = await getSelectedText();
-				let textBetweenTags = selectedText.match(
-					/<span style="color: (.*)">(.*)<\/span>/
+				const selections = await joplin.commands.execute(
+					"editor.execCommand",
+					{ name: "getSelections", args: [] }
 				);
 
-				if (textBetweenTags) {
-					await joplin.commands.execute(
-						"replaceSelection",
-						`${textBetweenTags[2]}`
+				console.log(selections);
+
+				const restoredSelections = selections.map((selection) => {
+					const textBetweenTags = selection.match(
+						/<span style="(?:color||background-color): (?:.{4}"|.{7}")>(.*)<\/span>/
 					);
-				}
+
+					console.log(textBetweenTags);
+
+					return textBetweenTags ? textBetweenTags[1] : selection;
+				});
+
+				console.log(restoredSelections);
+
+				await joplin.commands.execute("editor.execCommand", {
+					name: "replaceSelections",
+					args: [restoredSelections],
+				});
 			},
 		});
 
 		const extShortcut = (await joplin.settings.value(
 			"extShortcut"
 		)) as string;
-		const rcShortcut = (await joplin.settings.value(
-			"rcShortcut"
+
+		const rtShortcut = (await joplin.settings.value(
+			"rtShortcut"
 		)) as string;
 
 		await joplin.views.menus.create("text-colorize", "Text Colorize", [
 			{
-				commandName: "colorPick",
+				commandName: "colorize",
 				accelerator: extShortcut,
 			},
 
 			{
-				commandName: "restoreColor",
-				accelerator: rcShortcut,
+				commandName: "restoreText",
+				accelerator: rtShortcut,
 			},
 		]);
 	},
@@ -159,11 +151,13 @@ joplin.plugins.register({
 
 function generateHtml(savedColors) {
 	let savedColorsHTML = 'Saved colors <div class="saved-colors">';
+
 	savedColors.forEach((color) => {
 		color = color.trim();
 
 		savedColorsHTML += `<button value="${color}" class="saved-color" style="background-color: ${color}"></button>`;
 	});
+
 	savedColorsHTML += "</div>";
 
 	return `<div class="container"> 
@@ -195,16 +189,31 @@ function generateHtml(savedColors) {
 	</div>`;
 }
 
-async function getSelectedText() {
-	let selectedText = (await joplin.commands.execute(
-		"selectedText"
-	)) as string;
+async function colorize(selections, color, type) {
+	const colorizedSelections = selections.map(
+		(selection) => `<span style="${type}: ${color}">${selection}</span>`
+	);
 
-	const newlines = /\n/.test(selectedText);
+	await joplin.commands.execute("editor.execCommand", {
+		name: "replaceSelections",
+		args: [colorizedSelections],
+	});
+}
 
-	if (newlines) {
-		selectedText = `\n\n${selectedText}\n\n`;
+async function updateSavedColors(savedColors, changes) {
+	let updatedSavedColors = savedColors.split(";");
+
+	if (changes.add) {
+		changes.add.forEach((color) => {
+			updatedSavedColors.push(color);
+		});
 	}
 
-	return selectedText;
+	if (changes.remove) {
+		changes.remove.forEach((color) => {
+			updatedSavedColors.splice(updatedSavedColors.indexOf(color), 1);
+		});
+	}
+
+	await joplin.settings.setValue("saved", updatedSavedColors.join(";"));
 }
