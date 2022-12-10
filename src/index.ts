@@ -196,8 +196,9 @@ async function colorize(selections, color, type) {
 
 	await joplin.commands.execute("editor.execCommand", {
 		name: "replaceSelections",
-		args: [colorizedSelections],
+		args: [colorizedSelections, "around"],
 	});
+	await joplin.commands.execute('editor.focus');
 }
 
 async function updateSavedColors(savedColors, changes) {
