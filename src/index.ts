@@ -106,19 +106,13 @@ joplin.plugins.register({
 					{ name: "getSelections", args: [] }
 				);
 
-				console.log(selections);
-
 				const restoredSelections = selections.map((selection) => {
 					const textBetweenTags = selection.match(
 						/<span style="(?:color||background-color): (?:.{4}"|.{7}")>(.*)<\/span>/
 					);
 
-					console.log(textBetweenTags);
-
 					return textBetweenTags ? textBetweenTags[1] : selection;
 				});
-
-				console.log(restoredSelections);
 
 				await joplin.commands.execute("editor.execCommand", {
 					name: "replaceSelections",
@@ -198,7 +192,7 @@ async function colorize(selections, color, type) {
 		name: "replaceSelections",
 		args: [colorizedSelections, "around"],
 	});
-	await joplin.commands.execute('editor.focus');
+	await joplin.commands.execute("editor.focus");
 }
 
 async function updateSavedColors(savedColors, changes) {
