@@ -89,13 +89,13 @@ async function registerCommands(dialog) {
 			await dialogs.setHtml(dialog, dialogHtml);
 
 			const res = await dialogs.open(dialog);
-			const {
-				hex_input: color,
-				saved_colors_changes: savedColorsChanges,
-			} = res.formData.color_picker;
+			const color = res.formData.color_picker.hex_input;
+			const savedColorsChanges = JSON.parse(
+				res.formData.color_picker.saved_colors_changes,
+			);
 
 			if (savedColorsChanges.add || savedColorsChanges.remove) {
-				updateSavedColors(savedColors, JSON.parse(savedColorsChanges));
+				updateSavedColors(savedColors, savedColorsChanges);
 			}
 
 			if (res.id === "ok") {
