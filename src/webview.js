@@ -75,14 +75,12 @@ function handleRange(range) {
 }
 
 function getHex(value) {
-	hexValue = value.toString(16);
-
-	return hexValue.length < 2 ? `0${hexValue}` : hexValue;
+	return value.toString(16).padStart(2, "0");
 }
 
 function handleRgbInput(e) {
 	const input = e.target;
-	const value = input.value !== "" ? input.value : 0;
+	const value = input.value || 0;
 
 	switch (input.id) {
 		case "r-input":
@@ -149,8 +147,9 @@ function applySavedColor(e) {
 function removeSavedColor(e) {
 	e.preventDefault();
 
-	savedColorsChanges.remove.push(e.target.getAttribute("value"));
+	const colorValue = e.target.getAttribute("value");
 
+	savedColorsChanges.remove.push(colorValue);
 	savedColorsChangesInput.value = JSON.stringify(savedColorsChanges);
 
 	e.target.remove();
@@ -159,14 +158,15 @@ function removeSavedColor(e) {
 function saveNewColor(e) {
 	e.preventDefault();
 
-	savedColorsChanges.add.push(hexInput.value);
+	const colorValue = hexInput.value;
 
+	savedColorsChanges.add.push(colorValue);
 	savedColorsChangesInput.value = JSON.stringify(savedColorsChanges);
 
 	const node = document.createElement("button");
 	node.classList.add("saved-color");
-	node.value = hexInput.value;
-	node.style.backgroundColor = hexInput.value;
+	node.value = colorValue;
+	node.style.backgroundColor = colorValue;
 	node.addEventListener("click", applySavedColor);
 	node.addEventListener("contextmenu", removeSavedColor);
 
